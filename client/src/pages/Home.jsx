@@ -6,6 +6,8 @@ const Home = () => {
     const [loading, setLoading] = useState(false)
     const [allPost, setAllPost] = useState(null)
     const [searchText, setSearchText] = useState('')
+    const [filterResults, setFilterResults] = useState(null)
+    const [searchTimeout, setSearchTimeout] = useState(null)
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -32,6 +34,18 @@ const Home = () => {
         fetchPosts()
     }, [])
 
+    const handleSearchChange = (e) => {
+        clearTimeout(searchTimeout)
+        e.preventDefault()
+        setSearchText(e.target.value)
+        setSearchTimeout(
+            setTimeout(() => {
+                const searchResults = allPost.filter((post) => post.prompt.toLowerCase().includes(searchText.toLowerCase()) || post.name.toLowerCase().includes(searchText.toLowerCase()))
+                setFilterResults(searchResults)
+            }, 500)
+        )
+    }
+
     return (
 
         <section className='max-w-7xl mx-auto'>
@@ -44,7 +58,14 @@ const Home = () => {
                 </p>
             </div>
             <div className='mt-16'>
-                <FormField />
+                <FormField
+                    labelName='Search Posts'
+                    type="text"
+                    name="search"
+                    placeholder="Search posts"
+                    value={searchText}
+                    handleChange={handleSearchChange}
+                />
             </div>
 
             <div className='mt-10'>
@@ -59,7 +80,7 @@ const Home = () => {
                         }
                         <div className='grid lg:grid-cols-4 sm:grid-cols-3 xs:grid-cols-2 grid-cols-1 gap-3'>
                             {searchText ? (
-                                <RenderCards data={allPost} title="No search results found" />
+                                <RenderCards data={filterResults} title="No search results found" />
                             ) : (
                                 <RenderCards data={allPost} title={"No post found"} />
                             )}
